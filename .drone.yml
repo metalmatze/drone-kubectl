@@ -3,12 +3,19 @@ workspace:
   path: src/github.com/kubeciio/kubectl
 
 pipeline:
+  dep:
+    image: metalmatze/dep:1.9
+    commands:
+      - dep ensure -v -vendor-only
+
   test:
+    group: go
     image: golang:alpine
     commands:
       - go test -v ./...
 
   build:
+    group: go
     image: golang:alpine
     commands:
       - CGO_ENABLED=0 go build -ldflags -o kubeciio-kubectl ./cmd/kubeci-kubectl
