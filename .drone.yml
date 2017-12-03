@@ -18,4 +18,4 @@ pipeline:
     group: go
     image: golang:alpine
     commands:
-      - CGO_ENABLED=0 go build -ldflags -o kubeciio-kubectl ./cmd/kubeci-kubectl
+      - CGO_ENABLED=0 go build -o kubeciio/kubectl ./cmd/kubeciio/kubectl
