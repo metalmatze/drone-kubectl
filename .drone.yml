@@ -18,7 +18,7 @@ pipeline:
     group: go
     image: golang:alpine
     commands:
-      - CGO_ENABLED=0 go build -o kubeciio/kubectl ./cmd/kubeciio-kubectl
+      - CGO_ENABLED=0 go build -o kubeciio-kubectl ./cmd/kubeciio-kubectl
 
   docker:
     image: plugins/docker
