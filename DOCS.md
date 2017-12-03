@@ -87,4 +87,4 @@ pipeline:
 +     - /path/to/folder/foo.yaml 
 +     - /path/to/folder/bar.yaml 
 +     - /path/to/folder/baz.yaml
-+```
+```
