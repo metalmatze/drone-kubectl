@@ -1,0 +1,14 @@
+workspace:
+  base: /go
+  path: src/github.com/kubeciio/kubectl
+
+pipeline:
+  test:
+    image: golang:alpine
+    commands:
+      - go test -v ./...
+
+  build:
+    image: golang:alpine
+    commands:
+      - CGO_ENABLED=0 go build -ldflags -o kubeciio-kubectl ./cmd/kubeci-kubectl
