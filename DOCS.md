@@ -29,22 +29,24 @@ pipeline:
   pods:
     image: kubeciio/kubectl
     kubectl: get pods
-+   secret: [ kubeconfig ]
-+   kubeconfig_secret: kubeconfig
++   secrets: [ kubeconfig ]
 ```
 
 _This takes the secret kubeconfig, base64 decodes it and writes it to disk ready for kubectl._ 
 
-Example configuration using a different kubeconig via a secret:
+Example configuration using a different kubeconig via a secrets:
 
 ```diff
 pipeline:
   pods:
     image: kubeciio/kubectl
     kubectl: get pods
-+   secret: [ kubeconfig_development ]
-+   kubeconfig_secret: kubeconfig_development
++   secrets:
++     - source: kubeconfig_development
++       target: kubeconfig
 ```
+
+_This maps the `kubeconfig_develpment` secret to be used by the plugin as `kubeconfig` which is then forwarded to kubectl._
 
 Example configuration running inside a kubernetes cluster using a different namespace:
 
