@@ -18,16 +18,14 @@ import (
 const (
 	binary = "kubectl"
 
-	dryRunFlag             = "dry-run"
-	dryRunEnvVar           = "PLUGIN_DRY_RUN"
-	filesFlag              = "files"
-	filesEnvVar            = "PLUGIN_FILES"
-	kubeconfigSecretFlag   = "kubeconfig-secret"
-	kubeconfigSecretEnvVar = "PLUGIN_KUBECONFIG_SECRET"
-	kubectlFlag            = "kubectl"
-	kubectlEnvVar          = "PLUGIN_KUBECTL"
-	namespaceFlag          = "namespace"
-	namespaceEnvVar        = "PLUGIN_NAMESPACE"
+	dryRunFlag      = "dry-run"
+	dryRunEnvVar    = "PLUGIN_DRY_RUN"
+	filesFlag       = "files"
+	filesEnvVar     = "PLUGIN_FILES"
+	kubectlFlag     = "kubectl"
+	kubectlEnvVar   = "PLUGIN_KUBECTL"
+	namespaceFlag   = "namespace"
+	namespaceEnvVar = "PLUGIN_NAMESPACE"
 )
 
 func main() {
@@ -54,11 +52,6 @@ func main() {
 			Usage:  "the files to use with kubectl",
 		},
 		cli.StringFlag{
-			Name:   kubeconfigSecretFlag,
-			EnvVar: kubeconfigSecretEnvVar,
-			Usage:  "the secret's name to decode and use as a kubeconfig",
-		},
-		cli.StringFlag{
 			Name:   kubectlFlag,
 			EnvVar: kubectlEnvVar,
 			Usage:  "the kubectl command to execute",
@@ -82,9 +75,14 @@ func run(c *cli.Context) error {
 	}
 
 	kubeconfig := ""
-	if secret := c.String(kubeconfigSecretFlag); secret != "" {
-		kube64 := os.Getenv(strings.ToUpper(secret))
-		c, err := base64.StdEncoding.DecodeString(kube64)
+
+	kube64 := os.Getenv("KUBECONFIG")
+	if kube64 == "" {
+		fmt.Println("Using in-cluster credentials")
+	} else {
+		fmt.Println("Decoding kubeconfig from secret")
+
+		kube, err := base64.StdEncoding.DecodeString(kube64)
 		if err != nil {
 			return errors.Wrap(err, "failed to base64 decode kubeconfig from envvar")
 		}
@@ -95,7 +93,7 @@ func run(c *cli.Context) error {
 		}
 		defer os.Remove(tmpfile.Name())
 
-		if _, err := tmpfile.Write(c); err != nil {
+		if _, err := tmpfile.Write(kube); err != nil {
 			return errors.Wrap(err, "failed to write to tmp kubeconfig file")
 		}
 
@@ -106,18 +104,19 @@ func run(c *cli.Context) error {
 		kubeconfig = tmpfile.Name()
 	}
 
-	args := kubectlArgs(kubectl,
-		kubectlKubeconfig(kubeconfig),
-		kubectlFiles(c.StringSlice(filesFlag)),
-		kubectlNamespace(c.String(namespaceFlag)),
-	)
-
 	// Unset KUBECONFIG if set to avoid leaking kubeconfig
 	// We will only read it from file, ever
 	os.Unsetenv("KUBECONFIG")
 
+	args := kubectlArgs(kubectl,
+		//kubectlKubeconfig(kubeconfig),
+		kubectlFiles(c.StringSlice(filesFlag)),
+		kubectlNamespace(c.String(namespaceFlag)),
+	)
+
 	if !c.Bool(dryRunFlag) {
 		cmd := exec.CommandContext(context.TODO(), binary, args...)
+		cmd.Env = []string{"KUBECONFIG=" + kubeconfig}
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
