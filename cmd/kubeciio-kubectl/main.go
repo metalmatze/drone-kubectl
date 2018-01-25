@@ -216,92 +216,12 @@ func generateTemplate(path string) (string, error) {
 		return "", errors.Wrap(err, "failed to parse template")
 	}
 
-	data := struct {
-		DroneArch               string
-		DroneBranch             string
-		DroneBuildCreated       string
-		DroneBuildEvent         string
-		DroneBuildFinished      string
-		DroneBuildLink          string
-		DroneBuildNumber        string
-		DroneBuildStarted       string
-		DroneBuildStatus        string
-		DroneCommit             string
-		DroneCommitAuthor       string
-		DroneCommitAuthorAvatar string
-		DroneCommitAuthorEmail  string
-		DroneCommitBranch       string
-		DroneCommitLink         string
-		DroneCommitMessage      string
-		DroneCommitRef          string
-		DroneCommitSha          string
-		DroneJobFinished        string
-		DroneJobNumber          string
-		DroneJobStarted         string
-		DroneJobStatus          string
-		DroneMachine            string
-		DroneNetrcMachine       string
-		DroneNetrcPassword      string
-		DroneNetrcUsername      string
-		DroneParentBuildNumber  string
-		DronePrevBuildNumber    string
-		DronePrevBuildStatus    string
-		DronePrevCommitSha      string
-		DroneRemoteURL          string
-		DroneRepo               string
-		DroneRepoLink           string
-		DroneRepoName           string
-		DroneRepoOwner          string
-		DroneRepoPrivate        string
-		DroneRepoScm            string
-		DroneWorkspace          string
-	}{
-		DroneArch:               os.Getenv("DRONE_ARCH"),
-		DroneBranch:             os.Getenv("DRONE_BRANCH"),
-		DroneBuildCreated:       os.Getenv("DRONE_BUILD_CREATED"),
-		DroneBuildEvent:         os.Getenv("DRONE_BUILD_EVENT"),
-		DroneBuildFinished:      os.Getenv("DRONE_BUILD_FINISHED"),
-		DroneBuildLink:          os.Getenv("DRONE_BUILD_LINK"),
-		DroneBuildNumber:        os.Getenv("DRONE_BUILD_NUMBER"),
-		DroneBuildStarted:       os.Getenv("DRONE_BUILD_STARTED"),
-		DroneBuildStatus:        os.Getenv("DRONE_BUILD_STATUS"),
-		DroneCommit:             os.Getenv("DRONE_COMMIT"),
-		DroneCommitAuthor:       os.Getenv("DRONE_COMMIT_AUTHOR"),
-		DroneCommitAuthorAvatar: os.Getenv("DRONE_COMMIT_AUTHOR_AVATAR"),
-		DroneCommitAuthorEmail:  os.Getenv("DRONE_COMMIT_AUTHOR_EMAIL"),
-		DroneCommitBranch:       os.Getenv("DRONE_COMMIT_BRANCH"),
-		DroneCommitLink:         os.Getenv("DRONE_COMMIT_LINK"),
-		DroneCommitMessage:      os.Getenv("DRONE_COMMIT_MESSAGE"),
-		DroneCommitRef:          os.Getenv("DRONE_COMMIT_REF"),
-		DroneCommitSha:          os.Getenv("DRONE_COMMIT_SHA"),
-		DroneJobFinished:        os.Getenv("DRONE_JOB_FINISHED"),
-		DroneJobNumber:          os.Getenv("DRONE_JOB_NUMBER"),
-		DroneJobStarted:         os.Getenv("DRONE_JOB_STARTED"),
-		DroneJobStatus:          os.Getenv("DRONE_JOB_STATUS"),
-		DroneMachine:            os.Getenv("DRONE_MACHINE"),
-		DroneNetrcMachine:       os.Getenv("DRONE_NETRC_MACHINE"),
-		DroneNetrcPassword:      os.Getenv("DRONE_NETRC_PASSWORD"),
-		DroneNetrcUsername:      os.Getenv("DRONE_NETRC_USERNAME"),
-		DroneParentBuildNumber:  os.Getenv("DRONE_PARENT_BUILD_NUMBER"),
-		DronePrevBuildNumber:    os.Getenv("DRONE_PREV_BUILD_NUMBER"),
-		DronePrevBuildStatus:    os.Getenv("DRONE_PREV_BUILD_STATUS"),
-		DronePrevCommitSha:      os.Getenv("DRONE_PREV_COMMIT_SHA"),
-		DroneRemoteURL:          os.Getenv("DRONE_REMOTE_URL"),
-		DroneRepo:               os.Getenv("DRONE_REPO"),
-		DroneRepoLink:           os.Getenv("DRONE_REPO_LINK"),
-		DroneRepoName:           os.Getenv("DRONE_REPO_NAME"),
-		DroneRepoOwner:          os.Getenv("DRONE_REPO_OWNER"),
-		DroneRepoPrivate:        os.Getenv("DRONE_REPO_PRIVATE"),
-		DroneRepoScm:            os.Getenv("DRONE_REPO_SCM"),
-		DroneWorkspace:          os.Getenv("DRONE_WORKSPACE"),
-	}
-
 	tmpfile, err := ioutil.TempFile("", filepath.Base(path))
 	if err != nil {
 		return "", errors.Wrap(err, "failed to create tmp file for template")
 	}
 
-	if err := tmpl.Execute(tmpfile, data); err != nil {
+	if err := tmpl.Execute(tmpfile, os.Environ()); err != nil {
 		return "", errors.Wrap(err, "failed to generate file from template")
 	}
 
