@@ -204,12 +204,7 @@ func generateTemplate(path string) (string, error) {
 		return "", errors.Wrap(err, "failed to read file")
 	}
 
-	tmpl := template.New("template")
-	tmpl.Funcs(map[string]interface{}{
-		"truncate": func(len int, s string) string {
-			return s[:len]
-		},
-	})
+	tmpl := template.New("template").Funcs(helpers)
 
 	tmpl, err = tmpl.Parse(string(tc))
 	if err != nil {
@@ -311,3 +306,6 @@ func generateTemplate(path string) (string, error) {
 
 	return tmpfile.Name(), nil
 }
+
+
+
