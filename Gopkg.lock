@@ -8,10 +8,22 @@
   version = "v1.1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/fatih/camelcase"
+  packages = ["."]
+  revision = "44e46d280b43ec1531bb25252440e34f1b800b65"
+
+[[projects]]
   name = "github.com/joho/godotenv"
   packages = ["."]
   revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
   version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/pinzolo/casee"
+  packages = ["."]
+  revision = "956b6baf666aeb716a38e78d8e69823676048099"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -40,6 +52,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1ca28499cd26c97a1e6ab20b2679853b2123788c996f335396afb1ae3b37f1df"
+  inputs-digest = "bb534ea0fbf0d0f88f8c10a96eb31a87f73227b9a2c9bbc5578888056708161f"
   solver-name = "gps-cdcl"
   solver-version = 1
