@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
+	"unicode/utf8"
 
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
@@ -204,7 +206,20 @@ func generateTemplate(path string) (string, error) {
 		return "", errors.Wrap(err, "failed to read file")
 	}
 
-	tmpl := template.New("template").Funcs(helpers)
+	tmpl := template.New("template").Funcs(map[string]interface{}{
+		"upper":      strings.ToUpper,
+		"lower":      strings.ToLower,
+		"replace":    strings.Replace,
+		"split":      strings.Split,
+		"trim":       strings.Trim,
+		"trimPrefix": strings.TrimPrefix,
+		"trimSuffix": strings.TrimSuffix,
+		"toTitle":    strings.ToTitle,
+		"datetime":   templateDatetime,
+		"trunc":      templateTruncate,
+		"b64enc":     templateB64enc,
+		"b64dec":     templateB64dec,
+	})
 
 	tmpl, err = tmpl.Parse(string(tc))
 	if err != nil {
@@ -307,5 +322,40 @@ func generateTemplate(path string) (string, error) {
 	return tmpfile.Name(), nil
 }
 
+func templateDatetime(timestamp float64, layout, zone string) string {
+	if zone == "" {
+		return time.Unix(int64(timestamp), 0).Format(layout)
+	}
 
+	loc, err := time.LoadLocation(zone)
 
+	if err != nil {
+		return time.Unix(int64(timestamp), 0).Local().Format(layout)
+	}
+
+	return time.Unix(int64(timestamp), 0).In(loc).Format(layout)
+}
+
+func templateTruncate(s string, len int) string {
+	if utf8.RuneCountInString(s) <= len {
+		return s
+	}
+
+	runes := []rune(s)
+
+	return string(runes[:len])
+}
+
+func templateB64enc(s string) string {
+	return base64.StdEncoding.EncodeToString([]byte(s))
+}
+
+func templateB64dec(s string) string {
+	data, err := base64.StdEncoding.DecodeString(s)
+
+	if err != nil {
+		return s
+	}
+
+	return string(data)
+}
