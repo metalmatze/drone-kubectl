@@ -13,6 +13,7 @@ import (
 	"text/template"
 
 	"github.com/joho/godotenv"
+	"github.com/pinzolo/casee"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )
@@ -230,4 +231,15 @@ func generateTemplate(path string) (string, error) {
 	}
 
 	return tmpfile.Name(), nil
+}
+
+func environmentVariables() map[string]string {
+	variables := make(map[string]string, len(os.Environ()))
+
+	for _, env := range os.Environ() {
+		pair := strings.SplitN(env, "=", 2)
+		variables[casee.ToPascalCase(pair[0])] = pair[1]
+	}
+
+	return variables
 }

@@ -3,6 +3,10 @@
   version = "1.2.0"
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/pinzolo/casee"
+
+[[constraint]]
   name = "github.com/pkg/errors"
   version = "0.8.0"
 
