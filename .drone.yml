@@ -5,22 +5,26 @@ workspace:
 pipeline:
   dep:
     image: metalmatze/dep:0.4.1
+    pull: true
     commands:
       - dep ensure -v -vendor-only
 
   test:
     group: go
     image: golang:alpine
+    pull: true
     commands:
       - go test -v ./...
 
   build:
     group: go
     image: golang:alpine
+    pull: true
     commands:
       - CGO_ENABLED=0 go build -o kubeciio-kubectl ./cmd/kubeciio-kubectl
 
   docker:
-    image: plugins/docker
+    image: plugins/docker:17
+    pull: true
     repo: kubeciio/kubectl
     secrets: [ docker_username, docker_password ]
