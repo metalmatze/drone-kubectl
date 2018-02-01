@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -81,9 +82,9 @@ func main() {
 }
 
 func run(c *cli.Context) error {
-	kubectl := c.String(kubectlFlag)
-	if kubectl == "" {
-		return errors.New("no kubectl command specific")
+	kubectl, err := kubectlCommand(c.String(kubectlFlag))
+	if err != nil {
+		return err
 	}
 
 	kubeconfig := ""
@@ -142,6 +143,23 @@ func run(c *cli.Context) error {
 	return nil
 }
 
+// kubectlCommand makes sure there's not an empty string and executes templating if necessary
+func kubectlCommand(command string) (string, error) {
+	if command == "" {
+		return "", errors.New("no kubectl command specific")
+	}
+
+	// If kubectl command contains {{ }} then enable templating on the kubectl command
+	if strings.Contains(command, "{{") && strings.Contains(command, "}}") {
+		tmpl, err := generateTemplate(command)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to generate template from kubectl command")
+		}
+		return tmpl, err
+	}
+	return command, nil
+}
+
 type kubectlOption func([]string) []string
 
 func kubectlArgs(kubectl string, options ...kubectlOption) []string {
@@ -179,7 +197,7 @@ func kubectlTemplates(templates []string) kubectlOption {
 	return func(args []string) []string {
 		if !stringsContain(args, "--filename") && !stringsContain(args, "-f") {
 			for _, t := range templates {
-				path, err := generateTemplate(t)
+				path, err := generateTemplateFile(t)
 				if err != nil {
 					fmt.Println(t, err)
 					continue
@@ -201,12 +219,34 @@ func stringsContain(slice []string, s string) bool {
 	return false
 }
 
-func generateTemplate(path string) (string, error) {
+func generateTemplateFile(path string) (string, error) {
 	tc, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to read file")
 	}
 
+	tmpl, err := generateTemplate(string(tc))
+	if err != nil {
+		return "", errors.Wrap(err, "failed to generate template from file")
+	}
+
+	tmpfile, err := ioutil.TempFile("", filepath.Base(path))
+	if err != nil {
+		return "", errors.Wrap(err, "failed to create tmp file for template")
+	}
+
+	if _, err := tmpfile.WriteString(tmpl); err != nil {
+		return "", errors.Wrap(err, "failed to write template to tmp file")
+	}
+
+	if err := tmpfile.Close(); err != nil {
+		return "", errors.Wrap(err, "failed to close tmp file for template")
+	}
+
+	return tmpfile.Name(), nil
+}
+
+func generateTemplate(t string) (string, error) {
 	tmpl := template.New("template").Funcs(map[string]interface{}{
 		"upper":      strings.ToUpper,
 		"lower":      strings.ToLower,
@@ -222,25 +262,17 @@ func generateTemplate(path string) (string, error) {
 		"b64dec":     templateB64dec,
 	})
 
-	tmpl, err = tmpl.Parse(string(tc))
+	tmpl, err := tmpl.Parse(t)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to parse template")
 	}
 
-	tmpfile, err := ioutil.TempFile("", filepath.Base(path))
-	if err != nil {
-		return "", errors.Wrap(err, "failed to create tmp file for template")
+	w := bytes.NewBuffer(nil)
+	if err := tmpl.Execute(w, environmentVariables()); err != nil {
+		return "", errors.Wrap(err, "failed to execute template")
 	}
 
-	if err := tmpl.Execute(tmpfile, environmentVariables()); err != nil {
-		return "", errors.Wrap(err, "failed to generate file from template")
-	}
-
-	if err := tmpfile.Close(); err != nil {
-		return "", errors.Wrap(err, "failed to close tmp file for template")
-	}
-
-	return tmpfile.Name(), nil
+	return w.String(), err
 }
 
 func environmentVariables() map[string]string {
