@@ -46,7 +46,7 @@ func main() {
 	app.Name = "KubeCI kubectl"
 	app.Usage = "Run kubectl in your pipeline"
 	app.Action = run
-	app.Version = "0.1.0"
+	app.Version = "0.2.0"
 
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
