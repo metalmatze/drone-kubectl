@@ -15,7 +15,7 @@ Example configuration running inside a kubernetes cluster:
 
 ```yaml
 pipeline:
-  pods:
+  kubectl:
     image: kubeciio/kubectl
     kubectl: get pods
 ```
@@ -26,7 +26,7 @@ This is **required** when running outside a cluster or a different one should be
 
 ```diff
 pipeline:
-  pods:
+  kubectl:
     image: kubeciio/kubectl
     kubectl: get pods
 +   secrets: [ kubeconfig ]
@@ -38,7 +38,7 @@ Example configuration using a different kubeconig via a secrets:
 
 ```diff
 pipeline:
-  pods:
+  kubectl:
     image: kubeciio/kubectl
     kubectl: get pods
 +   secrets:
@@ -52,7 +52,7 @@ Example configuration running inside a kubernetes cluster using a different name
 
 ```diff
 pipeline:
-  pods:
+  kubectl:
     image: kubeciio/kubectl
 -   kubectl: get pods
 +   kubectl: --namespace kubeci get pods
@@ -62,7 +62,7 @@ equivalent:
 
 ```diff
 pipeline:
-  pods:
+  kubectl:
     image: kubeciio/kubectl
     kubectl: get pods
 +   namespace: kubeci
@@ -72,7 +72,7 @@ Example configuration using file paths to apply:
 
 ```diff
 pipeline:
-  pods:
+  kubectl:
     image: kubeciio/kubectl
 +   kubectl: apply -f /path/to/folder/foo.yaml -f /path/to/folder/bar.yaml -f /path/to/folder/baz.yaml
 ```
@@ -81,7 +81,7 @@ equivalent but easier to read:
 
 ```diff
 pipeline:
-  pods:
+  kubectl:
     image: kubeciio/kubectl
 -   kubectl: apply -f /path/to/folder/foo.yaml -f /path/to/folder/bar.yaml -f /path/to/folder/baz.yaml
 +   kubectl: apply
@@ -89,4 +89,17 @@ pipeline:
 +     - /path/to/folder/foo.yaml 
 +     - /path/to/folder/bar.yaml 
 +     - /path/to/folder/baz.yaml
+```
+
+### Templating
+
+Templating generate commands or files to be used by kubectl when executing.
+
+Setting the image to the current commit:
+
+```diff
+pipeline:
+  kubectl:
+   image: kubeciio/kubectl
+   kubectl: set image deployment/foo container=bar/baz:{{ .DroneCommit }}
 ```
