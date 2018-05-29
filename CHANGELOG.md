@@ -1,3 +1,7 @@
+## 0.2.1 / 2018-05-29
+
+* [ENHANCEMENT] Update kubectl to v1.10.3
+
 ## 0.2.0 / 2018-02-01
 
 * [FEATURE] Allow kubectl commands to use templating [#5]

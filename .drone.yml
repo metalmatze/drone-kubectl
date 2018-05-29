@@ -28,6 +28,6 @@ pipeline:
     pull: true
     repo: kubeciio/kubectl
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.2, 0.2.0, latest ]
+    tag: [ 0.2, 0.2.1, latest ]
     when:
       event: tag
