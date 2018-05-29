@@ -11,14 +11,14 @@ pipeline:
 
   test:
     group: go
-    image: golang:alpine
+    image: golang:1.10-alpine
     pull: true
     commands:
       - go test -v ./...
 
   build:
     group: go
-    image: golang:alpine
+    image: golang:1.10-alpine
     pull: true
     commands:
       - CGO_ENABLED=0 go build -o kubeciio-kubectl ./cmd/kubeciio-kubectl
