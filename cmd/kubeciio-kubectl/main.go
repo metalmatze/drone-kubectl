@@ -34,6 +34,8 @@ const (
 	namespaceEnvVar = "PLUGIN_NAMESPACE,NAMESPACE"
 	templatesFlag   = "templates"
 	templatesEnvVar = "PLUGIN_TEMPLATES,TEMPLATES"
+	debugFlag       = "debug"
+	debugEnvVar     = "PLUGIN_DEBUG,DEBUG"
 )
 
 func main() {
@@ -74,6 +76,11 @@ func main() {
 			EnvVar: templatesEnvVar,
 			Usage:  "the template files to use with kubectl",
 		},
+		cli.BoolFlag{
+			Name:   debugFlag,
+			EnvVar: debugEnvVar,
+			Usage:  "print out some sensitive debug info",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -90,14 +97,20 @@ func run(c *cli.Context) error {
 	kubeconfig := ""
 
 	kube64 := os.Getenv("KUBECONFIG")
-	if kube64 == "" {
-		fmt.Println("Using in-cluster credentials")
+	isInClusterConfig := kube64 == ""
+
+	if isInClusterConfig {
+		log.Println("Using in-cluster credentials")
 	} else {
-		fmt.Println("Decoding kubeconfig from secret")
+		log.Println("Decoding kubeconfig from secret")
 
 		kube, err := base64.StdEncoding.DecodeString(kube64)
 		if err != nil {
 			return errors.Wrap(err, "failed to base64 decode kubeconfig from envvar")
+		}
+
+		if c.Bool(debugFlag) {
+			log.Printf("decoded KUBECONFIG:\n%s", kube)
 		}
 
 		tmpfile, err := ioutil.TempFile("", "kubeconfig")
@@ -129,7 +142,9 @@ func run(c *cli.Context) error {
 
 	if !c.Bool(dryRunFlag) {
 		cmd := exec.CommandContext(context.TODO(), binary, args...)
-		cmd.Env = []string{"KUBECONFIG=" + kubeconfig}
+		if !isInClusterConfig {
+			cmd.Env = []string{"KUBECONFIG=" + kubeconfig}
+		}
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin

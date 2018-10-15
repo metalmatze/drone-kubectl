@@ -1,2 +1,3 @@
 /kubeciio-kubectl
 /vendor/
+.kube
