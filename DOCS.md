@@ -1,5 +1,5 @@
 ---
-date: 2017-012-05T00:00:00+00:00
+date: 2018-10-15T00:00:00+00:00
 title: kubectl
 author: kubeci
 tags: [ kubernetes, kubectl ]
@@ -102,4 +102,15 @@ pipeline:
   kubectl:
    image: kubeciio/kubectl
    kubectl: set image deployment/foo container=bar/baz:{{ .DroneCommit }}
+```
+
+### Debug
+
+You can turn on the debug mode to see some details like the plain text `kubeconfig`. **Attention** only use this on test systems, **NOT AT PRODUCTIVE SYSTEMS**.
+
+```diff
+pipeline:
+  kubectl:
+   image: kubeciio/kubectl
++  debug: true  
 ```

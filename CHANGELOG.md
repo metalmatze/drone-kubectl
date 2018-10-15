@@ -1,3 +1,8 @@
+## 0.2.2 / 2018-10-15
+* [ENHANCEMENT] Update kubectl to v1.12.1
+* [FIX] Using in cluster credentials for kubectl correctly.
+* [FEATURE] Add debug mode.
+
 ## 0.2.1 / 2018-05-29
 
 * [ENHANCEMENT] Update kubectl to v1.10.3
