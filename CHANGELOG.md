@@ -1,3 +1,11 @@
+## 0.3.0 / 2020-12-16
+
+Bring the entire project from 2017 to 2020
+
+* [ENHANCEMENT] Update kubectl to v1.19.4
+* [ENHANCEMENT] Update to Go 1.15
+* [FIX] Fix this plugin to work with new Drone config - needed to add prefix `PLUGIN_` to `PLUGIN_KUBECONFIG`  
+
 ## 0.2.2 / 2018-10-15
 * [ENHANCEMENT] Update kubectl to v1.12.1
 * [FIX] Using in cluster credentials for kubectl correctly.
