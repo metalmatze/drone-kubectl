@@ -32,8 +32,8 @@ steps:
   settings:
     repo: metalmatze/drone-kubectl
     tag:
-    - 0.2
-    - 0.2.2
+    - 0.3
+    - 0.3.0
     - latest
   environment:
     DOCKER_PASSWORD:
