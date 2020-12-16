@@ -1,33 +1,45 @@
+kind: pipeline
+name: default
+
+platform:
+  os: linux
+  arch: amd64
+
 workspace:
   base: /go
-  path: src/github.com/kubeciio/kubectl
+  path: src/github.com/metalmatze/drone-kubectl
 
-pipeline:
-  dep:
-    image: metalmatze/dep:0.4.1
-    pull: true
-    commands:
-      - dep ensure -v -vendor-only
-
-  test:
+steps:
+- name: test
+  pull: always
+  image: golang:1.15-alpine
+  commands:
+  - go test -v ./...
+  settings:
     group: go
-    image: golang:1.10-alpine
-    pull: true
-    commands:
-      - go test -v ./...
 
-  build:
+- name: build
+  pull: always
+  image: golang:1.15-alpine
+  commands:
+  - CGO_ENABLED=0 go build -o drone-kubectl ./cmd/drone-kubectl
+  settings:
     group: go
-    image: golang:1.10-alpine
-    pull: true
-    commands:
-      - CGO_ENABLED=0 go build -o kubeciio-kubectl ./cmd/kubeciio-kubectl
 
-  docker:
-    image: plugins/docker:17
-    pull: true
-    repo: kubeciio/kubectl
-    secrets: [ docker_username, docker_password ]
-    tag: [ 0.2, 0.2.2, latest ]
-    when:
-      event: tag
+- name: docker
+  pull: always
+  image: plugins/docker:19
+  settings:
+    repo: metalmatze/drone-kubectl
+    tag:
+    - 0.2
+    - 0.2.2
+    - latest
+  environment:
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+    DOCKER_USERNAME:
+      from_secret: docker_username
+  when:
+    event:
+    - tag

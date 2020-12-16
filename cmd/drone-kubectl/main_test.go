@@ -21,22 +21,22 @@ func TestKubectlFiles(t *testing.T) {
 	assert.Equal(t, []string{"apply", "-f", "foo.yaml", "-f", "bar.yaml"}, args)
 
 	// Don't overwrite files if already set
-	args = kubectlArgs("apply -f kubeci.yaml", kubectlFiles([]string{"foo.yaml"}))
-	assert.Equal(t, []string{"apply", "-f", "kubeci.yaml"}, args)
-	args = kubectlArgs("apply --filename kubeci.yaml", kubectlFiles([]string{"foo.yaml"}))
-	assert.Equal(t, []string{"apply", "--filename", "kubeci.yaml"}, args)
+	args = kubectlArgs("apply -f app.yaml", kubectlFiles([]string{"foo.yaml"}))
+	assert.Equal(t, []string{"apply", "-f", "app.yaml"}, args)
+	args = kubectlArgs("apply --filename app.yaml", kubectlFiles([]string{"foo.yaml"}))
+	assert.Equal(t, []string{"apply", "--filename", "app.yaml"}, args)
 }
 
 func TestKubectlNamespace(t *testing.T) {
 	args := kubectlArgs("get pods", kubectlNamespace(""))
 	assert.Equal(t, []string{"get", "pods"}, args)
-	args = kubectlArgs("get pods", kubectlNamespace("kubeci"))
-	assert.Equal(t, []string{"get", "pods", "--namespace", "kubeci"}, args)
+	args = kubectlArgs("get pods", kubectlNamespace("app"))
+	assert.Equal(t, []string{"get", "pods", "--namespace", "app"}, args)
 
 	// Don't overwrite namespace if already set
-	args = kubectlArgs("get pods -n drone", kubectlNamespace("kubeci"))
+	args = kubectlArgs("get pods -n drone", kubectlNamespace("app"))
 	assert.Equal(t, []string{"get", "pods", "-n", "drone"}, args)
-	args = kubectlArgs("get pods --namespace drone", kubectlNamespace("kubeci"))
+	args = kubectlArgs("get pods --namespace drone", kubectlNamespace("app"))
 	assert.Equal(t, []string{"get", "pods", "--namespace", "drone"}, args)
 }
 

@@ -1,13 +1,15 @@
-# kubectl
+# drone-kubectl
 
-KubeCI & Drone plugin to easier use kubectl in your pipeline.
+Drone plugin for easier use of kubectl in your pipelines.
+
+_This work is based on the previous KubeCI/kubectl plugin._
 
 ## Build
 
 Build the binary with the following commands:
 
 ```
-go build -v ./cmd/kubeci-kubectl
+go build -v ./cmd/drone-kubectl
 ```
 
 ## Docker
@@ -15,7 +17,7 @@ go build -v ./cmd/kubeci-kubectl
 Build the Docker image with the following commands:
 
 ```
-docker build --rm -t kubeciio/kubectl .
+docker build --rm -t metalmatze/drone-kubectl .
 ```
 
 ## Usage
@@ -24,9 +26,9 @@ Execute from the working directory:
 
 ```
 docker run --rm \
-  -e PLUGIN_NAMESPACE=kubeci \
+  -e PLUGIN_NAMESPACE=drone \
   -e PLUGIN_KUBECTL='get pods' \
   -v $(pwd):$(pwd) \
   -w $(pwd) \
-  kubeciio/kubectl
+  metalmatze/drone-kubectl
 ```

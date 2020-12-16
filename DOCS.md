@@ -1,11 +1,11 @@
 ---
 date: 2018-10-15T00:00:00+00:00
-title: kubectl
-author: kubeci
+title: drone-kubectl
+author: metalmatze
 tags: [ kubernetes, kubectl ]
-repo: kubeciio/kubectl
+repo: metalmatze/drone-kubectl
 logo: kubectl.svg
-image: kubeciio/kubectl
+image: metalmatze/drone-kubectl
 ---
 
 The kubectl plugin can be used to do everything kubectl can do.
@@ -16,7 +16,7 @@ Example configuration running inside a kubernetes cluster:
 ```yaml
 pipeline:
   kubectl:
-    image: kubeciio/kubectl
+    image: metalmatze/drone-kubectl
     kubectl: get pods
 ```
 
@@ -27,7 +27,7 @@ This is **required** when running outside a cluster or a different one should be
 ```diff
 pipeline:
   kubectl:
-    image: kubeciio/kubectl
+    image: metalmatze/drone-kubectl
     kubectl: get pods
 +   secrets: [ kubeconfig ]
 ```
@@ -39,7 +39,7 @@ Example configuration using a different kubeconig via a secrets:
 ```diff
 pipeline:
   kubectl:
-    image: kubeciio/kubectl
+    image: metalmatze/drone-kubectl
     kubectl: get pods
 +   secrets:
 +     - source: kubeconfig_development
@@ -53,9 +53,9 @@ Example configuration running inside a kubernetes cluster using a different name
 ```diff
 pipeline:
   kubectl:
-    image: kubeciio/kubectl
+    image: metalmatze/drone-kubectl
 -   kubectl: get pods
-+   kubectl: --namespace kubeci get pods
++   kubectl: --namespace application get pods
 ```
 
 equivalent:
@@ -63,9 +63,9 @@ equivalent:
 ```diff
 pipeline:
   kubectl:
-    image: kubeciio/kubectl
+    image: metalmatze/drone-kubectl
     kubectl: get pods
-+   namespace: kubeci
++   namespace: application
 ```
 
 Example configuration using file paths to apply:
@@ -73,7 +73,7 @@ Example configuration using file paths to apply:
 ```diff
 pipeline:
   kubectl:
-    image: kubeciio/kubectl
+    image: metalmatze/drone-kubectl
 +   kubectl: apply -f /path/to/folder/foo.yaml -f /path/to/folder/bar.yaml -f /path/to/folder/baz.yaml
 ```
 
@@ -82,7 +82,7 @@ equivalent but easier to read:
 ```diff
 pipeline:
   kubectl:
-    image: kubeciio/kubectl
+    image: metalmatze/drone-kubectl
 -   kubectl: apply -f /path/to/folder/foo.yaml -f /path/to/folder/bar.yaml -f /path/to/folder/baz.yaml
 +   kubectl: apply
 +   files: 
@@ -100,7 +100,7 @@ Setting the image to the current commit:
 ```diff
 pipeline:
   kubectl:
-   image: kubeciio/kubectl
+   image: metalmatze/drone-kubectl
    kubectl: set image deployment/foo container=bar/baz:{{ .DroneCommit }}
 ```
 
@@ -111,6 +111,6 @@ You can turn on the debug mode to see some details like the plain text `kubeconf
 ```diff
 pipeline:
   kubectl:
-   image: kubeciio/kubectl
+   image: metalmatze/drone-kubectl
 +  debug: true  
 ```

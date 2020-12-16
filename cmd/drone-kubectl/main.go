@@ -24,28 +24,30 @@ import (
 const (
 	binary = "kubectl"
 
-	dryRunFlag      = "dry-run"
-	dryRunEnvVar    = "PLUGIN_DRY_RUN,DRY_RUN"
-	filesFlag       = "files"
-	filesEnvVar     = "PLUGIN_FILES,FILES"
-	kubectlFlag     = "kubectl"
-	kubectlEnvVar   = "PLUGIN_KUBECTL,KUBECTL"
-	namespaceFlag   = "namespace"
-	namespaceEnvVar = "PLUGIN_NAMESPACE,NAMESPACE"
-	templatesFlag   = "templates"
-	templatesEnvVar = "PLUGIN_TEMPLATES,TEMPLATES"
-	debugFlag       = "debug"
-	debugEnvVar     = "PLUGIN_DEBUG,DEBUG"
+	dryRunFlag       = "dry-run"
+	dryRunEnvVar     = "PLUGIN_DRY_RUN,DRY_RUN"
+	filesFlag        = "files"
+	filesEnvVar      = "PLUGIN_FILES,FILES"
+	kubectlFlag      = "kubectl"
+	kubectlEnvVar    = "PLUGIN_KUBECTL,KUBECTL"
+	kubeconfigFlag   = "kubeconfig"
+	kubeconfigEnvVar = "PLUGIN_KUBECONFIG,KUBECONFIG"
+	namespaceFlag    = "namespace"
+	namespaceEnvVar  = "PLUGIN_NAMESPACE,NAMESPACE"
+	templatesFlag    = "templates"
+	templatesEnvVar  = "PLUGIN_TEMPLATES,TEMPLATES"
+	debugFlag        = "debug"
+	debugEnvVar      = "PLUGIN_DEBUG,DEBUG"
 )
 
 func main() {
 	// Load env-file if it exists first
 	if env := os.Getenv("PLUGIN_ENV_FILE"); env != "" {
-		godotenv.Load(env)
+		_ = godotenv.Load(env)
 	}
 
 	app := cli.NewApp()
-	app.Name = "KubeCI kubectl"
+	app.Name = "Drone kubectl"
 	app.Usage = "Run kubectl in your pipeline"
 	app.Action = run
 	app.Version = "0.2.0"
@@ -60,6 +62,11 @@ func main() {
 			Name:   filesFlag,
 			EnvVar: filesEnvVar,
 			Usage:  "the files to use with kubectl",
+		},
+		cli.StringFlag{
+			Name:   kubeconfigFlag,
+			EnvVar: kubeconfigEnvVar,
+			Usage:  "the base64 encoded kubeconfig to use",
 		},
 		cli.StringFlag{
 			Name:   kubectlFlag,
@@ -93,18 +100,16 @@ func run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
-	kubeconfig := ""
-
-	kube64 := os.Getenv("KUBECONFIG")
-	isInClusterConfig := kube64 == ""
+	kubeconfigPath := ""
+	kubeconfig64 := c.String(kubeconfigFlag)
+	isInClusterConfig := kubeconfig64 == ""
 
 	if isInClusterConfig {
 		log.Println("Using in-cluster credentials")
 	} else {
 		log.Println("Decoding kubeconfig from secret")
 
-		kube, err := base64.StdEncoding.DecodeString(kube64)
+		kube, err := base64.StdEncoding.DecodeString(kubeconfig64)
 		if err != nil {
 			return errors.Wrap(err, "failed to base64 decode kubeconfig from envvar")
 		}
@@ -127,12 +132,8 @@ func run(c *cli.Context) error {
 			return errors.Wrap(err, "failed to close tmp kubeconfig file")
 		}
 
-		kubeconfig = tmpfile.Name()
+		kubeconfigPath = tmpfile.Name()
 	}
-
-	// Unset KUBECONFIG if set to avoid leaking kubeconfig
-	// We will only read it from file, ever
-	os.Unsetenv("KUBECONFIG")
 
 	args := kubectlArgs(kubectl,
 		kubectlFiles(c.StringSlice(filesFlag)),
@@ -143,7 +144,7 @@ func run(c *cli.Context) error {
 	if !c.Bool(dryRunFlag) {
 		cmd := exec.CommandContext(context.TODO(), binary, args...)
 		if !isInClusterConfig {
-			cmd.Env = []string{"KUBECONFIG=" + kubeconfig}
+			cmd.Env = []string{"KUBECONFIG=" + kubeconfigPath}
 		}
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
