@@ -32,3 +32,22 @@ docker run --rm \
   -w $(pwd) \
   metalmatze/drone-kubectl
 ```
+
+## Usage in .drone.yaml
+
+```
+[...]
+steps:
+  - name: deploy
+    image: metalmatze/drone-kubectl
+    settings:
+      namespace: default
+      kubectl: 'apply'
+      files: 'deploy.yaml'
+      kubeconfig:
+        from_secret: kubeconfig
+    when:
+      [...]a
+```
+
+Note: The `kubeconfig` file to be used must be stored as a base64 encoded string via drone secrets
